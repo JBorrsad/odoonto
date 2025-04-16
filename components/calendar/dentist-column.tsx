@@ -3,6 +3,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Appointment } from "./appointment"
 import { Button } from "@/components/ui/button"
 import { NotAvailableArea } from "./not-available-area"
+import { BreakTime } from "./break-time"
+import { useEffect, useState, useRef } from "react"
 
 interface AppointmentData {
   id: string
@@ -31,6 +33,11 @@ interface DentistColumnProps {
   showPlayButton?: boolean
 }
 
+interface NotAvailableBlock {
+  startIndex: number;
+  endIndex: number;
+}
+
 export function DentistColumn({
   dentist,
   appointments,
@@ -41,6 +48,8 @@ export function DentistColumn({
 }: DentistColumnProps) {
   // Create slots for each half hour (9am to 4:30pm)
   const slots = Array(16).fill(null)
+  const [notAvailableBlocks, setNotAvailableBlocks] = useState<NotAvailableBlock[]>([])
+  const prevBlocksRef = useRef<NotAvailableBlock[]>([]);
 
   // Fill slots with appointments
   appointments.forEach((appointment) => {
@@ -54,28 +63,91 @@ export function DentistColumn({
     }
   })
 
+  // Función para agrupar celdas NOT AVAILABLE consecutivas
+  useEffect(() => {
+    if (!showNotAvailable) {
+      if (notAvailableBlocks.length > 0) {
+        setNotAvailableBlocks([]);
+      }
+      return;
+    }
+
+    const blocks: NotAvailableBlock[] = [];
+    let currentBlock: NotAvailableBlock | null = null;
+
+    // Encuentra bloques consecutivos de celdas vacías
+    slots.forEach((slot, index) => {
+      // Si el slot está vacío y estamos después del índice 5
+      if (index > 5 && !slot) {
+        if (!currentBlock) {
+          // Inicia un nuevo bloque
+          currentBlock = { startIndex: index, endIndex: index };
+        } else {
+          // Extiende el bloque actual
+          currentBlock.endIndex = index;
+        }
+      } else {
+        // Si hay un bloque activo, guárdalo y reinicia
+        if (currentBlock) {
+          blocks.push(currentBlock);
+          currentBlock = null;
+        }
+      }
+    });
+
+    // No olvides el último bloque si existe
+    if (currentBlock) {
+      blocks.push(currentBlock);
+    }
+
+    // Comparar si los bloques realmente cambiaron para evitar renderizados innecesarios
+    const areBlocksEqual = blocks.length === prevBlocksRef.current.length &&
+      blocks.every((block, index) =>
+        block.startIndex === prevBlocksRef.current[index]?.startIndex &&
+        block.endIndex === prevBlocksRef.current[index]?.endIndex
+      );
+    
+    if (!areBlocksEqual) {
+      prevBlocksRef.current = blocks;
+      setNotAvailableBlocks(blocks);
+    }
+  }, [slots, showNotAvailable, notAvailableBlocks.length]);
+
   return (
     <div className="flex-1 min-w-[250px] border-r">
-      <div className="flex items-center justify-between h-10 mb-2 px-2">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarImage src={dentist.avatar || "/placeholder.svg"} alt={dentist.name} />
-              <AvatarFallback>{dentist.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+      <div className="flex justify-between h-16 border-b border-gray-200 px-4 w-full">
+        <div className="flex items-center">
+          <Avatar className="h-8 w-8 flex-shrink-0 mr-3">
+            <AvatarImage src={dentist.avatar || "/placeholder.svg"} alt={dentist.name} />
+            <AvatarFallback>{dentist.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col justify-center">
             <span className="font-medium">{dentist.name}</span>
+            <div className="text-xs text-gray-400">Today's appointments: {dentist.appointments} patient(s)</div>
           </div>
-          <div className="text-xs text-gray-400 ml-8">Today's appointments: {dentist.appointments} patient(s)</div>
         </div>
-        <Button variant="ghost" size="icon" className="h-6 w-6">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" className="h-6 w-6">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
+      
       {slots.map((slot, index) => {
         // Only render appointment at its start slot
         const shouldRenderAppointment = slot && slot.isStart
         const isHalfHour = index % 2 !== 0
+
+        // Verificar si este índice es el inicio de un bloque NOT AVAILABLE
+        const isNotAvailableStart = notAvailableBlocks.some(block => block.startIndex === index);
+        
+        // Obtener el bloque si este índice es el inicio
+        const notAvailableBlock = notAvailableBlocks.find(block => block.startIndex === index);
+        
+        // Verificar si este índice es parte de un bloque (pero no el inicio)
+        const isPartOfNotAvailableBlock = notAvailableBlocks.some(
+          block => index > block.startIndex && index <= block.endIndex
+        );
 
         return (
           <div
@@ -113,28 +185,8 @@ export function DentistColumn({
             ) : null}
 
             {index === 7 && showBreakTime && !slot ? (
-              <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-400 z-10">
-                <span className="flex items-center gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-gray-400"
-                  >
-                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                    <line x1="6" y1="1" x2="6" y2="4"></line>
-                    <line x1="10" y1="1" x2="10" y2="4"></line>
-                    <line x1="14" y1="1" x2="14" y2="4"></line>
-                  </svg>
-                  BREAK TIME
-                </span>
+              <div className="absolute inset-0 z-10">
+                <BreakTime />
               </div>
             ) : null}
 
@@ -162,7 +214,27 @@ export function DentistColumn({
               </div>
             ) : null}
 
-            {showNotAvailable && index > 5 && !slot ? <NotAvailableArea /> : null}
+            {/* Renderizar NOT AVAILABLE solo para el primer índice del bloque */}
+            {isNotAvailableStart && notAvailableBlock && showNotAvailable ? (
+              <div 
+                className="absolute z-10"
+                style={{
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: `${(notAvailableBlock.endIndex - notAvailableBlock.startIndex + 1) * 48}px`,
+                }}
+              >
+                <NotAvailableArea />
+              </div>
+            ) : null}
+
+            {/* Renderizar NOT AVAILABLE para celdas individuales que no forman parte de ningún bloque */}
+            {!slot && showNotAvailable && index > 5 && !isNotAvailableStart && !isPartOfNotAvailableBlock ? (
+              <div className="absolute inset-0 z-10">
+                <NotAvailableArea />
+              </div>
+            ) : null}
           </div>
         )
       })}

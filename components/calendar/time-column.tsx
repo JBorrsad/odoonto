@@ -19,18 +19,20 @@ export function TimeColumn() {
   ]
 
   return (
-    <div className="w-16 pr-2 text-right border-r">
-      <div className="h-10 text-xs font-medium text-gray-500 mb-2">
-        GMT
-        <br />
-        +01:00
+    <div className="w-16 pr-2 text-right border-r relative">
+      <div className="h-16 text-xs font-medium text-gray-500">
+        
       </div>
       {hours.map((hour, index) => (
         <div
           key={index}
-          className={`${hour.isHalfHour ? "h-12" : "h-12"} text-xs font-medium text-gray-500 ${hour.isHalfHour ? "" : ""}`}
+          className="h-12 relative"
         >
-          {hour.time}
+          {!hour.isHalfHour && (
+            <div className="absolute -top-2 right-2 text-xs font-medium text-gray-500">
+              {hour.time}
+            </div>
+          )}
         </div>
       ))}
     </div>

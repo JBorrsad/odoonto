@@ -1,7 +1,7 @@
 export function NotAvailableArea() {
   return (
     <div className="h-full w-full relative overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-400 z-10">NOT AVAILABLE</div>
+      <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-400 font-medium z-10">NOT AVAILABLE</div>
       <div
         className="absolute inset-0 bg-gray-100 opacity-50"
         style={{

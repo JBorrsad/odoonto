@@ -166,7 +166,7 @@ export function CalendarView() {
           })}
 
           <div className="w-10 flex flex-col items-center border-l">
-            <div className="h-10 mb-2"></div>
+            <div className="h-16"></div>
             {Array(16)
               .fill(null)
               .map((_, index) => (
@@ -186,26 +186,16 @@ export function CalendarView() {
           {/* Current time indicator (red line) */}
           <div
             className="absolute left-0 right-0 border-t-2 border-red-500 z-10"
-            style={{ top: "calc(12:00 PM - 9:00 AM + 6 * 48px)", height: "2px" }}
+            style={{ top: "480px", height: "2px" }}
           >
-            <div className="absolute -right-1 -top-1.5 h-3 w-3 rounded-full bg-red-500"></div>
-            <div className="absolute -left-1 -top-1.5 h-3 w-3 rounded-full bg-red-500"></div>
           </div>
 
-          {/* Time marker */}
+          {/* Time marker - rectángulo negro con texto blanco centrado */}
           <div
-            className="absolute right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-sm z-10"
-            style={{ top: "calc(12:00 PM - 9:00 AM + 6 * 48px - 10px)", right: "11px" }}
+            className="absolute bg-gray-800 text-white text-xs px-1.5 py-0.5 rounded-sm z-10 left-1/2 transform -translate-x-1/2"
+            style={{ top: "472px" }}
           >
-            12:00 PM
-          </div>
-
-          {/* Feedback button */}
-          <div className="absolute bottom-4 right-4">
-            <Button size="sm" variant="outline" className="rounded-full flex items-center gap-1 bg-white">
-              <MessageCircle className="h-4 w-4" />
-              Feedback
-            </Button>
+            13:30
           </div>
         </div>
       </div>
