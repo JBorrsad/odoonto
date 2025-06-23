@@ -1,19 +1,45 @@
 version: '3.9'
 
 services:
+  user-svc:
+    build: ../src/microservices/user
+    env_file: .env.user
+    depends_on: [rabbit, postgres]
+    networks:
+      - microservices
+  
+  wallet-svc:
+    build: ../src/microservices/wallet
+    env_file: .env.wallet
+    depends_on: [rabbit, postgres]
+    networks:
+      - microservices
+
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-container
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - microservices
+
   postgres:
     container_name: postgres-container
-    image: postgres:alpine
+    image: postgres:16-alpine
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: 'user'
-      POSTGRES_PASSWORD: 'password'
-      POSTGRES_DB: 'ddh'
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: odoonto
     volumes:
-      - ddh-postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     networks:
-      - postgres
+      - microservices
 
   pgadmin:
     container_name: pgadmin_container
@@ -24,11 +50,11 @@ services:
     ports:
       - 5050:80
     networks:
-      - postgres
+      - microservices
 
 networks:
-  postgres:
+  microservices:
     driver: bridge
 
 volumes:
-  ddh-postgres:
+  pgdata:

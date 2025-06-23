@@ -1,0 +1,280 @@
+---
+description: Arquitecto de backend especializado en aplicaciones de odontología con DDD y arquitectura hexagonal
+globs: src/**/*.ts,src/**/*.js,*.ts,*.js,**.md
+alwaysApply: false
+---
+quiero hacer un refactor del repositorio, para cambiar todo lo que hay en src. 
+
+tienes que mover los archivos para cumplir con este nuevo esqueleto que te voy a mostrar. tienes que hacerlo de la siguiente manera: crea la carpeta src2, y dentro, vas a poner los archivos del actual src, para que tengan la estructura que te voy a mostrar ahora.
+
+-de momento solo quiero que muevas los archivos a su nuevo lugar, y que crees la nueva estructura del proyecto. no toques el contenido de los archivos de momento. solo coloca cada cosa donde le toca. 
+
+-si tienes dudas de donde va algun archivo, preguntame antes de colocarlo en un lugar erroneo. 
+
+
+
+├─ microservices/
+│   ├─ user/
+│   │   ├─ src/
+│   │   │   ├─ main.ts        ← nuevo bootstrap NestJS Microservice
+│   │   │   └─ modules/user/  ← mueve todo lo que hoy está en src/modules/user
+│   │   ├─ test/
+│   │   ├─ package.json
+│   │   ├─ tsconfig.json
+│   │   ├─Dockerfile
+│   │   └─ (otros archivos...)
+│   └─ wallet/        ← análogo
+│
+├─ libs/                      ← “shared-kernel”
+│   ├─ exceptions/
+│   ├─ logger/
+│   └─ config/
+│
+├─ docker/
+│   ├─ docker-compose.yml     ← orquesta DB, broker y microservicios
+│   └─ *.env
+│
+├─ package.json               ← workspaces: ["services/*"]
+└─ tsconfig.base.json
+
+
+una vez completada la nueva estructura, necesito que me digas que archivos crees que se tienen que quedar, se tienen que ir, o que archivos contienen contenido que es importante modificar antes de completar el refactor de la nueva estructura.
+
+
+Pasos de refactor detallados
+#	Acción	Detalle resumido
+1	Inicia workspaces	Ejecuta pnpm init -w (o Yarn/Nx). En el package.json raíz declara:
+"workspaces": ["services/*", "libs/*"].
+2	Extrae Shared Kernel	Copia src/libs/** a libs/shared.
+Crea su package.json con "name": "@odoonto/shared". Usa dependency-cruiser para impedir ciclos.
+3	Copia módulos	bash<br>mv src/modules/user services/user-service/src/modules<br>mv src/modules/wallet services/wallet-service/src/modules<br>
+4	Bootstrap microservicio	Añade en services/*/src/main.ts el bootstrap que verás más abajo.
+5	Config por servicio	En libs/config, crea user.config.ts, wallet.config.ts, etc., que lean sus propios .env.
+6	Comunicaciones	Publica eventos de dominio por RabbitMQ/NATS.
+Define los DTO en libs/shared/events/*.ts.
+7	Dockerizar	Cada servicio tiene su Dockerfile multi-stage.
+El docker-compose.yml base queda como el bloque de ejemplo posterior.
+8	Pruebas	Cada servicio mantiene su jest.config.ts; los tests E2E se lanzan vía Compose.
+9	CI/CD	En el pipeline: pnpm -r test → pnpm -r build.
+Valida las variables con dotenv-schema.
+10	Eliminar monolito	Cuando todo pase tests y levante, borra la antigua carpeta src/ y archivos huérfanos, dejando sólo services/ y libs/.
+
+
+Código para el paso 4 (bootstrap NestJS)
+ts
+Copy
+Edit
+import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.createMicroservice(AppModule, {
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.RMQ_URL],
+      queue: 'user',            // en wallet-service usa 'wallet'
+      queueOptions: { durable: true },
+    },
+  });
+
+  await app.listen();
+}
+bootstrap();
+Fragmento de docker-compose.yml para el paso 7
+yaml
+Copy
+Edit
+version: '3.9'
+services:
+  user-svc:
+    build: ./services/user-service
+    env_file: .env.user
+    depends_on: [rabbit, postgres]
+  
+  wallet-svc:
+    build: ./services/wallet-service
+    env_file: .env.wallet
+    depends_on: [rabbit, postgres]
+
+  rabbit:
+    image: rabbitmq:3-management
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
+4. DDD y arquitectura hexagonal en microservicios
+Bounded Context ≈ Servicio: user y wallet mantienen sus invariantes sin compartir tablas directamente; se comunican sólo mediante eventos.
+
+Puertos/Adaptadores: las interfaces (port.ts) residen en la capa Application; los repositorios SQL, HTTP-clients, etc. se ubican en Infrastructure.
+
+Libs compartidas (libs/shared) contienen utilidades transversales estables, nunca lógica de dominio.
+
+5. Migración incremental sin downtime
+Strangler Fig: Arranca los nuevos contenedores y enruta solo /users al user-service.
+
+Feature Flags para wallet-service: primero lectura, luego escritura; monitoriza métricas.
+
+Apaga gradualmente los endpoints del monolito cuando el 100 % del tráfico esté en microservicios.
+
+Próximos pasos rápidos
+Crea la rama refactor/microservices y completa los pasos 1-3.
+
+Lanza docker-compose up y verifica health checks de ambos servicios.
+
+Escribe tu primer Contract Test (Pact) entre user-service y wallet-service antes de migrar más lógica.
+
+Con el refactor bien formateado tendrás un monorepo limpio, microservicios alineados con DDD/Hexagonal y listos para escalar.
+
+
+
+mapeo exacto: Mapeo exacto: de src/ → legacy_mono/ + nuevo src/
+Convención: todo lo que hoy está en src/… pasa a legacy_mono/… para preservarlo sin compilar.
+El nuevo árbol se genera desde cero dentro de src/.
+
+Origen (actual)	Destino (nuevo)	Notas
+src/modules/user/**	src/microservices/user/src/modules/user/**	tree
+src/modules/wallet/**	src/microservices/wallet/src/modules/wallet/**	
+src/configs/**	src/libs/config/**	Solo archivos de configuración, no los valores .env.
+src/libs/**	src/libs/shared/**	Mantiene estructura interna (api/, ddd/, etc.).
+src/app.module.ts	legacy_mono/app.module.ts	tree
+src/main.ts	legacy_mono/main.ts	
+Tests
+tests/setup/**
+tests/shared/**	tests/ (raíz, sin cambios)	Mantén tests utilitarios en raíz; moverlos no aporta valor.
+tests/user/**	src/microservices/user/test/**	Agrupa tests por dominio.
+Otros ficheros raíz (.eslintrc.js, .prettierrc, nest-cli.json, etc.)	Se quedan en raíz	Ajustaremos referencias internas.
+
+Los SQL de /database no se mueven todavía; después los duplicarás en microservices/<dominio>/migrations/.
+
+
+
+
+
+Estructura resultante
+bash
+Copy
+Edit
+legacy_mono/               ← monolito congelado (se borrará al final)
+src/
+├─ microservices/
+│  ├─ user/
+│  │   ├─ src/...
+│  │   ├─ test/
+│  │   ├─ Dockerfile
+│  │   ├─ package.json
+│  │   └─ tsconfig.json
+│  └─ wallet/              ← análogo
+├─ libs/
+│  ├─ config/
+│  └─ shared/...
+└─ (no más código fuera de aquí)
+
+Cambios de configuración mínima para que compile a la primera
+package.json (root)
+
+jsonc
+Copy
+Edit
+{
+  "name": "odoonto-backend",
+  "workspaces": ["src/microservices/*", "src/libs/*"]
+}
+tsconfig.base.json
+
+jsonc
+Copy
+Edit
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["libs/shared/*"],
+      "@config/*": ["libs/config/*"]
+    }
+  }
+}
+nest-cli.json
+
+json
+Copy
+Edit
+{
+  "monorepo": true,
+  "root": "src",
+  "projects": {
+    "user": { "type": "application", "root": "microservices/user" },
+    "wallet": { "type": "application", "root": "microservices/wallet" }
+  }
+}
+docker-compose.yml (rutas de build)
+
+yaml
+Copy
+Edit
+user-svc:
+  build: ./src/microservices/user
+wallet-svc:
+  build: ./src/microservices/wallet
+Script seguro de movimiento (bash)
+bash
+Copy
+Edit
+# 1. Archivar monolito
+mkdir legacy_mono
+git mv src/* legacy_mono/
+
+# 2. Nuevo esqueleto
+mkdir -p src/{microservices/{user,wallet}/src/modules,libs/{config,shared}}
+mkdir -p src/microservices/{user,wallet}/test
+
+# 3. Mover módulos
+git mv legacy_mono/modules/user src/microservices/user/src/modules/
+git mv legacy_mono/modules/wallet src/microservices/wallet/src/modules/
+
+# 4. Mover libs y configs
+git mv legacy_mono/libs/* src/libs/shared/
+git mv legacy_mono/configs/* src/libs/config/
+
+# 5. Mantener tests de dominio junto a su servicio
+git mv tests/user src/microservices/user/test
+
+# 6. Commit
+git add -A
+git commit -m "feat(refactor): mueve código al nuevo monorepo de microservicios"
+(Ajusta rutas si usas Windows o un shell diferente.)
+
+Archivos a revisar o eliminar tras el movimiento
+Mantener (pero editar)	Eliminar cuando compile	Crear/Completar
+.dependency-cruiser.js → añade src/*.	legacy_mono/**	src/microservices/*/package.json
+jest-e2e.json, .jestrc.json → apúntalos a src.	nest-cli.out.json (si se generó).	src/microservices/*/tsconfig.json (extiende ../../tsconfig.base.json).
+docker/docker-compose.yml	—	src/libs/config/*.ts
+
+Recomendaciones finales para minimizar errores
+Automatiza el rename: usa el script anterior, no el IDE, para preservar historial Git.
+
+Prueba incremental: compila primero src/libs/shared, luego un solo micro (user) con pnpm --filter @odoonto/user build.
+
+Linters primero: ajusta eslint y prettier paths antes de tocar código.
+
+Próximos pasos (máx. 3)
+Ejecuta el script de movimiento en una rama refactor/fs-layout.
+
+Ajusta tsconfig, nest-cli.json y docker-compose.yml según arriba y verifica que pnpm install && pnpm run build pasa.
+
+Copia las migraciones de /database a cada microservicio y adapta schema antes de empezar a re-escribir código de infraestructura.
+
+
+
+
+
+
+
+
+
