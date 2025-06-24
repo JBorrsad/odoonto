@@ -1,1 +1,0 @@
-{"version":3,"file":"wallet.errors.js","sourceRoot":"","sources":["../../../../../../../src/modules/wallet/domain/wallet.errors.ts"],"names":[],"mappings":";;;AAAA,yEAAmD;AAEnD,MAAa,2BAA4B,SAAQ,0BAAa;IAK5D,YAAY,QAAkB;QAC5B,KAAK,CAAC,2BAA2B,CAAC,OAAO,EAAE,SAAS,EAAE,QAAQ,CAAC,CAAC;QAHlD,SAAI,GAAG,2BAA2B,CAAC;IAInD,CAAC;;AAPH,kEAQC;AAPiB,mCAAO,GAAG,+BAA+B,AAAlC,CAAmC"}

@@ -22,5 +22,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["legacy_mono", "tests", "dist", "node_modules"]
+  "exclude": ["legacy_mono", "dist", "node_modules"]
 }

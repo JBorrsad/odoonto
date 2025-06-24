@@ -6,13 +6,18 @@
   "projects": {
     "user": {
       "type": "application",
-      "root": "microservices/user",
-      "sourceRoot": "microservices/user/src"
+      "root": "src/microservices/user",
+      "sourceRoot": "src/microservices/user/src"
     },
     "wallet": {
       "type": "application",
-      "root": "microservices/wallet",
-      "sourceRoot": "microservices/wallet/src"
+      "root": "src/microservices/wallet",
+      "sourceRoot": "src/microservices/wallet/src"
+    },
+    "shared": {
+      "type": "library",
+      "root": "src/libs/shared",
+      "sourceRoot": "src/libs/shared"
     }
   }
 }

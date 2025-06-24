@@ -5,11 +5,5 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*", "../../../src/libs/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test/**/*",
-    "../../../legacy_mono/**/*",
-    "../../../tests/**/*"
-  ]
+  "exclude": ["node_modules", "dist", "../../../legacy_mono/**/*"]
 }
