@@ -3,10 +3,12 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "entryFile": "main",
-  "projects": {},
+  "monorepo": false,
+  "root": ".",
   "compilerOptions": {
     "deleteOutDir": true,
     "tsConfigPath": "tsconfig.json",
-    "webpack": false
+    "webpack": false,
+    "assets": []
   }
 }

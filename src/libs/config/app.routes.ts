@@ -14,10 +14,12 @@ export const routesV1 = {
   version: v1,
   user: {
     root: usersRoot,
+    byId: `/${usersRoot}/:id`,
     delete: `/${usersRoot}/:id`,
   },
   wallet: {
     root: walletsRoot,
+    byId: `/${walletsRoot}/:id`,
     delete: `/${walletsRoot}/:id`,
   },
 };

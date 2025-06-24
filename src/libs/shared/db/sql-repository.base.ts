@@ -9,7 +9,6 @@ import {
   DatabasePool,
   DatabaseTransactionConnection,
   IdentifierSqlToken,
-  MixedRow,
   PrimitiveValueExpression,
   QueryResult,
   QueryResultRow,
@@ -24,8 +23,7 @@ import { ObjectLiteral } from '../types';
 export abstract class SqlRepositoryBase<
   Aggregate extends AggregateRoot<any>,
   DbModel extends ObjectLiteral,
-> implements RepositoryPort<Aggregate>
-{
+> implements RepositoryPort<Aggregate> {
   protected abstract tableName: string;
 
   protected abstract schema: ZodObject<any>;
@@ -35,10 +33,10 @@ export abstract class SqlRepositoryBase<
     protected readonly mapper: Mapper<Aggregate, DbModel>,
     protected readonly eventEmitter: EventEmitter2,
     protected readonly logger: LoggerPort,
-  ) {}
+  ) { }
 
   async findOneById(id: string): Promise<Option<Aggregate>> {
-    const query = sql.type(this.schema)`SELECT * FROM ${sql.identifier([
+    const query = sql`SELECT * FROM ${sql.identifier([
       this.tableName,
     ])} WHERE id = ${id}`;
 
@@ -47,7 +45,7 @@ export abstract class SqlRepositoryBase<
   }
 
   async findAll(): Promise<Aggregate[]> {
-    const query = sql.type(this.schema)`SELECT * FROM ${sql.identifier([
+    const query = sql`SELECT * FROM ${sql.identifier([
       this.tableName,
     ])}`;
 
@@ -59,7 +57,7 @@ export abstract class SqlRepositoryBase<
   async findAllPaginated(
     params: PaginatedQueryParams,
   ): Promise<Paginated<Aggregate>> {
-    const query = sql.type(this.schema)`
+    const query = sql`
     SELECT * FROM ${sql.identifier([this.tableName])}
     LIMIT ${params.limit}
     OFFSET ${params.offset}
@@ -83,8 +81,7 @@ export abstract class SqlRepositoryBase<
     ])} WHERE id = ${entity.id}`;
 
     this.logger.debug(
-      `[${RequestContextService.getRequestId()}] deleting entities ${
-        entity.id
+      `[${RequestContextService.getRequestId()}] deleting entities ${entity.id
       } from ${this.tableName}`,
     );
 
@@ -111,8 +108,7 @@ export abstract class SqlRepositoryBase<
     } catch (error) {
       if (error instanceof UniqueIntegrityConstraintViolationError) {
         this.logger.debug(
-          `[${RequestContextService.getRequestId()}] ${
-            (error.originalError as any).detail
+          `[${RequestContextService.getRequestId()}] ${(error.originalError as any).detail
           }`,
         );
         throw new ConflictException('Record already exists', error);
@@ -127,31 +123,20 @@ export abstract class SqlRepositoryBase<
    * and does some debug logging.
    * For read queries use `this.pool` directly
    */
-  protected async writeQuery<T>(
-    sql: SqlSqlToken<
-      T extends MixedRow ? T : Record<string, PrimitiveValueExpression>
-    >,
+  protected async writeQuery(
+    sqlQuery: SqlSqlToken,
     entity: Aggregate | Aggregate[],
-  ): Promise<
-    QueryResult<
-      T extends MixedRow
-        ? T extends ZodTypeAny
-          ? TypeOf<ZodTypeAny & MixedRow & T>
-          : T
-        : T
-    >
-  > {
+  ): Promise<QueryResult<any>> {
     const entities = Array.isArray(entity) ? entity : [entity];
     entities.forEach((entity) => entity.validate());
     const entityIds = entities.map((e) => e.id);
 
     this.logger.debug(
-      `[${RequestContextService.getRequestId()}] writing ${
-        entities.length
+      `[${RequestContextService.getRequestId()}] writing ${entities.length
       } entities to "${this.tableName}" table: ${entityIds}`,
     );
 
-    const result = await this.pool.query(sql);
+    const result = await this.pool.query(sqlQuery);
 
     await Promise.all(
       entities.map((entity) =>

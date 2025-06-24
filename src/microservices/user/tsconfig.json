@@ -2,8 +2,13 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@config/*": ["./config/*"]
+    }
   },
-  "include": ["src/**/*", "../../../src/libs/**/*"],
-  "exclude": ["node_modules", "dist", "../../../legacy_mono/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
