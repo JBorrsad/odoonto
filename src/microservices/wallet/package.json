@@ -4,10 +4,13 @@
   "description": "Wallet microservice for Odoonto dental application",
   "main": "dist/main.js",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "nest build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch"
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/main",
+    "lint": "eslint \"{src,apps,libs}/**/*.ts\" --fix"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -27,6 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.42.0",
+    "rimraf": "^3.0.2",
     "source-map-support": "^0.5.21",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",

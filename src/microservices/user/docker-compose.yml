@@ -1,22 +1,16 @@
 # User microservice - standalone
-version: '3.9'
+version: "3.9"
 
 services:
   user-svc:
     build: .
     container_name: user-microservice-standalone
     ports:
-      - 3001:3000
-    environment:
-      - NODE_ENV=production
-      - RMQ_URL=${RMQ_URL:-amqp://localhost:5672}
-      - DB_HOST=${DB_HOST:-localhost}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_DATABASE=${DB_DATABASE:-odoonto}
+      - "${PORT:-3001}:${PORT:-3001}"
+    env_file: .env
     networks:
       - user-network
+    restart: unless-stopped
 
 networks:
   user-network:
