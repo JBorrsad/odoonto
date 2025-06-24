@@ -3,7 +3,7 @@ import { DatabasePool, sql } from 'slonik';
 import { UserRepositoryPort } from './user.repository.port';
 import { z } from 'zod';
 import { UserMapper } from '../user.mapper';
-import { UserRoles } from '../domain/user.types';
+
 import { UserEntity } from '../domain/user.entity';
 import { SqlRepositoryBase } from '@shared/db/sql-repository.base';
 import { Injectable, Logger } from '@nestjs/common';

@@ -1,10 +1,7 @@
 import { QueryBus } from '@nestjs/cqrs';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { Result, match } from 'oxide.ts';
-import { ResponseBase } from '@shared/api/response.base';
 import { Paginated } from '@shared/ddd';
-import { PaginatedParams } from '@shared/ddd/query.base';
-import { UserModel } from '../../database/user.repository';
 import { UserPaginatedGraphqlResponseDto } from '../../dtos/graphql/user.paginated-gql-response.dto';
 import { FindUsersQuery } from './find-users.query-handler';
 import { UserMapper } from '../../user.mapper';

@@ -9,14 +9,13 @@ import {
   DatabasePool,
   DatabaseTransactionConnection,
   IdentifierSqlToken,
-  PrimitiveValueExpression,
   QueryResult,
   QueryResultRow,
   sql,
   SqlSqlToken,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
-import { ZodTypeAny, TypeOf, ZodObject } from 'zod';
+import { ZodObject } from 'zod';
 import { LoggerPort } from '../ports/logger.port';
 import { ObjectLiteral } from '../types';
 

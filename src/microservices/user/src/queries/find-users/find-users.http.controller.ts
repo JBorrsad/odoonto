@@ -4,7 +4,6 @@ import { QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Result, match } from 'oxide.ts';
 import { UserPaginatedResponseDto } from '../../dtos/user.paginated.response.dto';
-import { UserResponseDto } from '../../dtos/user.response.dto';
 import { FindUsersQuery } from './find-users.query-handler';
 import { FindUsersRequestDto } from './find-users.request.dto';
 import { UserMapper } from '../../user.mapper';
