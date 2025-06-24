@@ -1,56 +1,51 @@
-import { Body, Controller, Get, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { routesV1 } from '@config/app.routes';
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { Result } from 'oxide.ts';
-import { FindUsersRequestDto } from './find-users.request.dto';
-import { FindUsersQuery } from './find-users.query-handler';
-import { Paginated } from '@shared/ddd';
+import { Result, match } from 'oxide.ts';
 import { UserPaginatedResponseDto } from '../../dtos/user.paginated.response.dto';
-import { PaginatedQueryRequestDto } from '@shared/api/paginated-query.request.dto';
-import { UserModel } from '../../database/user.repository';
-import { ResponseBase } from '@shared/api/response.base';
+import { UserResponseDto } from '../../dtos/user.response.dto';
+import { FindUsersQuery } from './find-users.query-handler';
+import { FindUsersRequestDto } from './find-users.request.dto';
+import { UserMapper } from '../../user.mapper';
+import { UserEntity } from '../../domain/user.entity';
+import { Paginated } from '@shared/ddd';
 
 @Controller(routesV1.version)
 export class FindUsersHttpController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly userMapper: UserMapper,
+  ) { }
 
-  @Get(routesV1.user.root)
   @ApiOperation({ summary: 'Find users' })
   @ApiResponse({
-    status: HttpStatus.OK,
+    status: 200,
+    description: 'Users found',
     type: UserPaginatedResponseDto,
   })
-  async findUsers(
-    @Body() request: FindUsersRequestDto,
-    @Query() queryParams: PaginatedQueryRequestDto,
-  ): Promise<UserPaginatedResponseDto> {
-    const query = new FindUsersQuery({
-      ...request,
-      limit: queryParams?.limit,
-      page: queryParams?.page,
+  @Get(routesV1.user.root)
+  async findUsers(@Query() query: FindUsersRequestDto): Promise<UserPaginatedResponseDto> {
+    const findUsersQuery = new FindUsersQuery({
+      country: query.country,
+      limit: query.limit,
+      page: query.page,
+      postalCode: query.postalCode,
+      street: query.street,
     });
-    const result: Result<
-      Paginated<UserModel>,
-      Error
-    > = await this.queryBus.execute(query);
 
-    const paginated = result.unwrap();
+    const result: Result<Paginated<UserEntity>, Error> = await this.queryBus.execute(findUsersQuery);
 
-    // Whitelisting returned properties
-    return new UserPaginatedResponseDto({
-      ...paginated,
-      data: paginated.data.map((user) => ({
-        ...new ResponseBase({
-          id: user.id,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-        }),
-        email: user.email,
-        country: user.country,
-        street: user.street,
-        postalCode: user.postalCode,
-      })),
+    return match(result, {
+      Ok: (paginated: Paginated<UserEntity>) => {
+        return new UserPaginatedResponseDto({
+          ...paginated,
+          data: paginated.data.map((user) => this.userMapper.toResponse(user)),
+        });
+      },
+      Err: (error: Error) => {
+        throw error;
+      },
     });
   }
 }

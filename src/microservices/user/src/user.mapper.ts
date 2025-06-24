@@ -1,9 +1,10 @@
 import { Mapper } from '@shared/ddd';
-import { UserModel, userSchema } from './database/user.repository';
+import { UserModel } from './database/user.repository';
 import { Address } from './domain/value-objects/address.value-object';
 import { UserEntity } from './domain/user.entity';
 import { UserResponseDto } from './dtos/user.response.dto';
 import { Injectable } from '@nestjs/common';
+import { UserRoles } from './domain/user.types';
 
 /**
  * Mapper constructs objects that are used in different layers:
@@ -14,21 +15,19 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserMapper
-  implements Mapper<UserEntity, UserModel, UserResponseDto>
-{
+  implements Mapper<UserEntity, UserModel, UserResponseDto> {
   toPersistence(entity: UserEntity): UserModel {
     const copy = entity.getProps();
     const record: UserModel = {
       id: copy.id,
-      createdAt: copy.createdAt,
-      updatedAt: copy.updatedAt,
+      createdAt: copy.createdAt.toISOString(),
+      updatedAt: copy.updatedAt.toISOString(),
       email: copy.email,
-      country: copy.address.country,
-      postalCode: copy.address.postalCode,
-      street: copy.address.street,
-      role: copy.role,
+      country: copy.address?.country,
+      postalCode: copy.address?.postalCode,
+      street: copy.address?.street,
     };
-    return userSchema.parse(record);
+    return record;
   }
 
   toDomain(record: UserModel): UserEntity {
@@ -38,12 +37,18 @@ export class UserMapper
       updatedAt: new Date(record.updatedAt),
       props: {
         email: record.email,
-        role: record.role,
-        address: new Address({
-          street: record.street,
-          postalCode: record.postalCode,
-          country: record.country,
-        }),
+        role: UserRoles.guest,
+        address: record.country || record.postalCode || record.street
+          ? new Address({
+            country: record.country || '',
+            postalCode: record.postalCode || '',
+            street: record.street || '',
+          })
+          : new Address({
+            country: '',
+            postalCode: '',
+            street: '',
+          }),
       },
     });
     return entity;
@@ -53,9 +58,10 @@ export class UserMapper
     const props = entity.getProps();
     const response = new UserResponseDto(entity);
     response.email = props.email;
-    response.country = props.address.country;
-    response.postalCode = props.address.postalCode;
-    response.street = props.address.street;
+    response.country = props.address?.country;
+    response.postalCode = props.address?.postalCode;
+    response.street = props.address?.street;
+    response.role = props.role;
     return response;
   }
 

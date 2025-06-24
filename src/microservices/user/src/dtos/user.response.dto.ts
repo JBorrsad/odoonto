@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ResponseBase } from '@shared/api/response.base';
+import { UserRoles } from '../domain/user.types';
 
 export class UserResponseDto extends ResponseBase {
   @ApiProperty({
@@ -7,6 +8,13 @@ export class UserResponseDto extends ResponseBase {
     description: "User's email address",
   })
   email: string;
+
+  @ApiProperty({
+    example: 'guest',
+    description: "User's role",
+    enum: UserRoles,
+  })
+  role: UserRoles;
 
   @ApiProperty({
     example: 'France',

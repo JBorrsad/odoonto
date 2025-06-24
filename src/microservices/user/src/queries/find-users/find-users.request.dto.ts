@@ -6,8 +6,9 @@ import {
   Matches,
   IsOptional,
 } from 'class-validator';
+import { PaginatedQueryRequestDto } from '@shared/api/paginated-query.request.dto';
 
-export class FindUsersRequestDto {
+export class FindUsersRequestDto extends PaginatedQueryRequestDto {
   @ApiProperty({ example: 'France', description: 'Country of residence' })
   @IsOptional()
   @MaxLength(50)
