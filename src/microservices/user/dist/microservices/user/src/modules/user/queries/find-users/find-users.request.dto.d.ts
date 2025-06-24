@@ -1,5 +1,5 @@
 export declare class FindUsersRequestDto {
-    readonly country?: string;
-    readonly postalCode?: string;
-    readonly street?: string;
+  readonly country?: string;
+  readonly postalCode?: string;
+  readonly street?: string;
 }

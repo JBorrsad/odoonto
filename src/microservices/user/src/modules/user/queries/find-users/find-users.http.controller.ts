@@ -42,7 +42,7 @@ export class FindUsersHttpController {
       ...paginated,
       data: paginated.data.map((user) => ({
         ...new ResponseBase({
-          id: user.id!,
+          id: user.id,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         }),
