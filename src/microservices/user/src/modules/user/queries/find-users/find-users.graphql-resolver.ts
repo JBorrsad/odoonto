@@ -1,9 +1,9 @@
 import { QueryBus } from '@nestjs/cqrs';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { Result } from 'oxide.ts';
-import { ResponseBase } from '../../../../libs/api/response.base';
-import { Paginated } from '../../../../libs/ddd';
-import { PaginatedParams } from '../../../../libs/ddd/query.base';
+import { ResponseBase } from '@shared/api/response.base';
+import { Paginated } from '@shared/ddd';
+import { PaginatedParams } from '@shared/ddd/query.base';
 import { UserModel } from '../../database/user.repository';
 import { UserPaginatedGraphqlResponseDto } from '../../dtos/graphql/user.paginated-gql-response.dto';
 import { FindUsersQuery } from './find-users.query-handler';
@@ -26,7 +26,11 @@ export class FindUsersGraphqlResolver {
     const response = new UserPaginatedGraphqlResponseDto({
       ...paginated,
       data: paginated.data.map((user) => ({
-        ...new ResponseBase(user),
+        ...new ResponseBase({
+          id: user.id!,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        }),
         email: user.email,
         country: user.country,
         street: user.street,

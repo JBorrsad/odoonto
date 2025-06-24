@@ -4,7 +4,15 @@
   "monorepo": true,
   "root": "src",
   "projects": {
-    "user": { "type": "application", "root": "microservices/user" },
-    "wallet": { "type": "application", "root": "microservices/wallet" }
+    "user": {
+      "type": "application",
+      "root": "microservices/user",
+      "sourceRoot": "microservices/user/src"
+    },
+    "wallet": {
+      "type": "application",
+      "root": "microservices/wallet",
+      "sourceRoot": "microservices/wallet/src"
+    }
   }
 }

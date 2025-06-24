@@ -1,4 +1,4 @@
-import { DomainEvent, DomainEventProps } from '@libs/ddd';
+import { DomainEvent, DomainEventProps } from '@shared/ddd';
 
 export class UserAddressUpdatedDomainEvent extends DomainEvent {
   public readonly country: string;

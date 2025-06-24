@@ -11,10 +11,10 @@ import { CommandBus } from '@nestjs/cqrs';
 import { match, Result } from 'oxide.ts';
 import { CreateUserCommand } from './create-user.command';
 import { CreateUserRequestDto } from './create-user.request.dto';
-import { UserAlreadyExistsError } from '@modules/user/domain/user.errors';
-import { IdResponse } from '@libs/api/id.response.dto';
-import { AggregateID } from '@libs/ddd';
-import { ApiErrorResponse } from '@src/libs/api/api-error.response';
+import { UserAlreadyExistsError } from '../../domain/user.errors';
+import { IdResponse } from '@shared/api/id.response.dto';
+import { AggregateID } from '@shared/ddd';
+import { ApiErrorResponse } from '@shared/api/api-error.response';
 
 @Controller(routesV1.version)
 export class CreateUserHttpController {

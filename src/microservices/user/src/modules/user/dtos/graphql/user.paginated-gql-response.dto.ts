@@ -1,12 +1,18 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { PaginatedGraphqlResponse } from '../../../../libs/api/graphql/paginated.graphql-response.base';
-
+import {
+  PaginatedGraphqlResponse,
+  IPaginatedType,
+} from '@shared/api/graphql/paginated.graphql-response.base';
 import { UserGraphqlResponseDto } from './user.graphql-response.dto';
 
-@ObjectType()
-export class UserPaginatedGraphqlResponseDto extends PaginatedGraphqlResponse(
-  UserGraphqlResponseDto,
-) {
+/**
+ * GraphQL paginated response for User objects
+ */
+@ObjectType('UserPaginatedGraphqlResponse')
+export class UserPaginatedGraphqlResponseDto
+  extends PaginatedGraphqlResponse(UserGraphqlResponseDto)
+  implements IPaginatedType<UserGraphqlResponseDto>
+{
   @Field(() => [UserGraphqlResponseDto])
-  data: UserGraphqlResponseDto[];
+  declare data: UserGraphqlResponseDto[];
 }

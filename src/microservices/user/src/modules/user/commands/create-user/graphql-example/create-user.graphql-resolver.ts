@@ -3,8 +3,8 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../create-user.command';
 import { CreateUserGqlRequestDto } from './dtos/create-user.gql-request.dto';
 import { IdGqlResponse } from './dtos/id.gql-response.dto';
-import { AggregateID } from '@src/libs/ddd';
-import { UserAlreadyExistsError } from '@src/modules/user/domain/user.errors';
+import { AggregateID } from '@shared/ddd';
+import { UserAlreadyExistsError } from '../../../domain/user.errors';
 import { Result } from 'oxide.ts';
 
 // If you are Using GraphQL you'll need a Resolver instead of a Controller

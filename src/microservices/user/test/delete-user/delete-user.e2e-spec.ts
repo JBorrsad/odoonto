@@ -1,5 +1,5 @@
 import { UserResponseDto } from '@modules/user/dtos/user.response.dto';
-import { IdResponse } from '@src/libs/api/id.response.dto';
+import { IdResponse } from '@shared/api/id.response.dto';
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import { DatabasePool, sql } from 'slonik';
 import { TestContext } from '@tests/test-utils/TestContext';

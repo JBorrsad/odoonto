@@ -1,4 +1,4 @@
-import { Command, CommandProps } from '@libs/ddd';
+import { Command, CommandProps } from '@shared/ddd';
 
 export class CreateUserCommand extends Command {
   readonly email: string;

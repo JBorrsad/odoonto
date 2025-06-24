@@ -1,6 +1,6 @@
-import { ValueObject } from '@libs/ddd';
-import { Guard } from '@libs/guard';
-import { ArgumentOutOfRangeException } from '@libs/exceptions';
+import { ValueObject } from '@shared/ddd';
+import { Guard } from '@shared/guard';
+import { ArgumentOutOfRangeException } from '@shared/exceptions';
 
 /** Note:
  * Value Objects with multiple properties can contain

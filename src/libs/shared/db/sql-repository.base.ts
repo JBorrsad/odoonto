@@ -1,8 +1,8 @@
-import { RequestContextService } from '@libs/application/context/AppRequestContext';
-import { AggregateRoot, PaginatedQueryParams, Paginated } from '@libs/ddd';
-import { Mapper } from '@libs/ddd';
-import { RepositoryPort } from '@libs/ddd';
-import { ConflictException } from '@libs/exceptions';
+import { RequestContextService } from '@shared/application/context/AppRequestContext';
+import { AggregateRoot, PaginatedQueryParams, Paginated } from '@shared/ddd';
+import { Mapper } from '@shared/ddd';
+import { RepositoryPort } from '@shared/ddd';
+import { ConflictException } from '@shared/exceptions';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { None, Option, Some } from 'oxide.ts';
 import {

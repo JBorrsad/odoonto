@@ -1,7 +1,7 @@
-import { routesV1 } from '@src/configs/app.routes';
-import { IdResponse } from '@src/libs/api/id.response.dto';
-import { CreateUserRequestDto } from '@src/modules/user/commands/create-user/create-user.request.dto';
-import { UserPaginatedResponseDto } from '@src/modules/user/dtos/user.paginated.response.dto';
+import { routesV1 } from '../src/libs/config/app.routes';
+import { IdResponse } from '../src/libs/shared/api/id.response.dto';
+import { CreateUserRequestDto } from '../src/microservices/user/src/modules/user/commands/create-user/create-user.request.dto';
+import { UserPaginatedResponseDto } from '../src/microservices/user/src/modules/user/dtos/user.paginated.response.dto';
 import { getHttpServer } from '@tests/setup/jestSetupAfterEnv';
 
 export class ApiClient {

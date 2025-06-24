@@ -2,13 +2,14 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
-    "paths": {
-      "@shared/*": ["../../libs/shared/*"],
-      "@config/*": ["../../libs/config/*"]
-    }
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test/**/*"]
-} 
+  "include": ["src/**/*", "../../../src/libs/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test/**/*",
+    "../../../legacy_mono/**/*",
+    "../../../tests/**/*"
+  ]
+}

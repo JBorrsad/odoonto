@@ -20,5 +20,7 @@
       "@shared/*": ["libs/shared/*"],
       "@config/*": ["libs/config/*"]
     }
-  }
-} 
+  },
+  "include": ["src/**/*"],
+  "exclude": ["legacy_mono", "tests", "dist", "node_modules"]
+}
