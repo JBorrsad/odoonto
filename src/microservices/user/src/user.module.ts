@@ -1,5 +1,6 @@
 import { Logger, Module, Provider } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RequestContextModule } from 'nestjs-request-context';
 import { UserRepository } from './database/user.repository';
 import { DatabaseModule } from './database/database.module';
 import { CreateUserHttpController } from './commands/create-user/create-user.http.controller';
@@ -19,6 +20,7 @@ import { UserMapper } from './user.mapper';
 import { CqrsModule } from '@nestjs/cqrs';
 import { USER_REPOSITORY } from './user.di-tokens';
 import { FindUsersGraphqlResolver } from './queries/find-users/find-users.graphql-resolver';
+import { HealthController } from './health/health.controller';
 
 const httpControllers = [
   CreateUserHttpController,
@@ -26,6 +28,7 @@ const httpControllers = [
   UpdateUserHttpController,
   FindUsersHttpController,
   FindUserByIdHttpController,
+  HealthController,
 ];
 
 const messageControllers = [CreateUserMessageController];
@@ -49,6 +52,7 @@ const repositories: Provider[] = [
 
 @Module({
   imports: [
+    RequestContextModule,
     DatabaseModule,
     CqrsModule,
     EventEmitterModule.forRoot(),

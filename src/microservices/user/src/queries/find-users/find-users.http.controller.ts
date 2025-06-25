@@ -1,14 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { routesV1 } from '@config/app.routes';
 import { QueryBus } from '@nestjs/cqrs';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Result, match } from 'oxide.ts';
-import { UserPaginatedResponseDto } from '../../dtos/user.paginated.response.dto';
+import { UserResponseDto } from '../../dtos/user.response.dto';
 import { FindUsersQuery } from './find-users.query-handler';
-import { FindUsersRequestDto } from './find-users.request.dto';
 import { UserMapper } from '../../user.mapper';
 import { UserEntity } from '../../domain/user.entity';
-import { Paginated } from '@shared/ddd';
 
 @Controller(routesV1.version)
 export class FindUsersHttpController {
@@ -17,30 +15,21 @@ export class FindUsersHttpController {
     private readonly userMapper: UserMapper,
   ) { }
 
-  @ApiOperation({ summary: 'Find users' })
+  @ApiOperation({ summary: 'Find all users' })
   @ApiResponse({
     status: 200,
-    description: 'Users found',
-    type: UserPaginatedResponseDto,
+    description: 'All users found',
+    type: [UserResponseDto],
   })
   @Get(routesV1.user.root)
-  async findUsers(@Query() query: FindUsersRequestDto): Promise<UserPaginatedResponseDto> {
-    const findUsersQuery = new FindUsersQuery({
-      country: query.country,
-      limit: query.limit,
-      page: query.page,
-      postalCode: query.postalCode,
-      street: query.street,
-    });
+  async findUsers(): Promise<UserResponseDto[]> {
+    const findUsersQuery = new FindUsersQuery();
 
-    const result: Result<Paginated<UserEntity>, Error> = await this.queryBus.execute(findUsersQuery);
+    const result: Result<UserEntity[], Error> = await this.queryBus.execute(findUsersQuery);
 
     return match(result, {
-      Ok: (paginated: Paginated<UserEntity>) => {
-        return new UserPaginatedResponseDto({
-          ...paginated,
-          data: paginated.data.map((user) => this.userMapper.toResponse(user)),
-        });
+      Ok: (users: UserEntity[]) => {
+        return users.map((user) => this.userMapper.toResponse(user));
       },
       Err: (error: Error) => {
         throw error;

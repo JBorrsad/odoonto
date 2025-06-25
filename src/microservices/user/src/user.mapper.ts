@@ -26,6 +26,7 @@ export class UserMapper
       country: copy.address?.country,
       postalCode: copy.address?.postalCode,
       street: copy.address?.street,
+      role: copy.role,
     };
     return record;
   }
@@ -37,7 +38,7 @@ export class UserMapper
       updatedAt: new Date(record.updatedAt),
       props: {
         email: record.email,
-        role: UserRoles.guest,
+        role: (record.role as UserRoles) || UserRoles.guest,
         address: record.country || record.postalCode || record.street
           ? new Address({
             country: record.country || '',

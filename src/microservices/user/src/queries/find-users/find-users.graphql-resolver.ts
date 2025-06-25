@@ -1,8 +1,7 @@
 import { QueryBus } from '@nestjs/cqrs';
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Query, Resolver } from '@nestjs/graphql';
 import { Result, match } from 'oxide.ts';
-import { Paginated } from '@shared/ddd';
-import { UserPaginatedGraphqlResponseDto } from '../../dtos/graphql/user.paginated-gql-response.dto';
+import { UserGraphqlResponseDto } from '../../dtos/graphql/user.graphql-response.dto';
 import { FindUsersQuery } from './find-users.query-handler';
 import { UserMapper } from '../../user.mapper';
 import { UserEntity } from '../../domain/user.entity';
@@ -14,30 +13,15 @@ export class FindUsersGraphqlResolver {
     private readonly userMapper: UserMapper,
   ) { }
 
-  @Query(() => UserPaginatedGraphqlResponseDto, { name: 'users' })
-  async findUsers(
-    @Args('country', { nullable: true }) country?: string,
-    @Args('postalCode', { nullable: true }) postalCode?: string,
-    @Args('street', { nullable: true }) street?: string,
-    @Args('limit', { nullable: true }) limit?: number,
-    @Args('page', { nullable: true }) page?: number,
-  ): Promise<UserPaginatedGraphqlResponseDto> {
-    const findUsersQuery = new FindUsersQuery({
-      country,
-      postalCode,
-      street,
-      limit: limit || 20,
-      page: page || 1,
-    });
+  @Query(() => [UserGraphqlResponseDto], { name: 'users' })
+  async findUsers(): Promise<UserGraphqlResponseDto[]> {
+    const findUsersQuery = new FindUsersQuery();
 
-    const result: Result<Paginated<UserEntity>, Error> = await this.queryBus.execute(findUsersQuery);
+    const result: Result<UserEntity[], Error> = await this.queryBus.execute(findUsersQuery);
 
     return match(result, {
-      Ok: (paginated: Paginated<UserEntity>) => {
-        return new UserPaginatedGraphqlResponseDto({
-          ...paginated,
-          data: paginated.data.map((user) => this.userMapper.toResponse(user)),
-        });
+      Ok: (users: UserEntity[]) => {
+        return users.map((user) => this.userMapper.toResponse(user));
       },
       Err: (error: Error) => {
         throw error;

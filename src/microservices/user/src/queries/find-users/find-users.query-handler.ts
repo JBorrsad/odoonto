@@ -1,65 +1,43 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Ok, Result } from 'oxide.ts';
-import { PaginatedParams, PaginatedQueryBase } from '@shared/ddd/query.base';
-import { Paginated } from '@shared/ddd';
+import { Ok, Err, Result } from 'oxide.ts';
 import { InjectPool } from 'nestjs-slonik';
 import { DatabasePool, sql } from 'slonik';
 import { UserModel, userSchema } from '../../database/user.repository';
+import { UserMapper } from '../../user.mapper';
+import { UserEntity } from '../../domain/user.entity';
 
-export class FindUsersQuery extends PaginatedQueryBase {
-  readonly country?: string;
-
-  readonly postalCode?: string;
-
-  readonly street?: string;
-
-  constructor(props: PaginatedParams<FindUsersQuery>) {
-    super(props);
-    this.country = props.country;
-    this.postalCode = props.postalCode;
-    this.street = props.street;
-  }
-}
+export class FindUsersQuery { }
 
 @QueryHandler(FindUsersQuery)
 export class FindUsersQueryHandler implements IQueryHandler {
   constructor(
     @InjectPool()
     private readonly pool: DatabasePool,
-  ) {}
+    private readonly userMapper: UserMapper,
+  ) { }
 
-  /**
-   * In read model we don't need to execute
-   * any business logic, so we can bypass
-   * domain and repository layers completely
-   * and execute query directly
-   */
-  async execute(
-    query: FindUsersQuery,
-  ): Promise<Result<Paginated<UserModel>, Error>> {
-    /**
-     * Constructing a query with Slonik.
-     * More info: https://contra.com/p/AqZWWoUB-writing-composable-sql-using-java-script
-     */
-    const statement = sql.type(userSchema)`
-         SELECT *
-         FROM users
-         WHERE
-           ${query.country ? sql`country = ${query.country}` : true} AND
-           ${query.street ? sql`street = ${query.street}` : true} AND
-           ${query.postalCode ? sql`"postalCode" = ${query.postalCode}` : true}
-         LIMIT ${query.limit}
-         OFFSET ${query.offset}`;
+  async execute(): Promise<Result<UserEntity[], Error>> {
+    try {
+      const statement = sql.type(userSchema)`
+        SELECT *
+        FROM users
+        ORDER BY "createdAt" DESC`;
 
-    const records = await this.pool.query(statement);
+      const records = await this.pool.query(statement);
 
-    return Ok(
-      new Paginated({
-        data: records.rows,
-        count: records.rowCount,
-        limit: query.limit,
-        page: query.page,
-      }),
-    );
+      console.log('Records found:', records.rowCount);
+      console.log('First record:', records.rows[0]);
+
+      const users = records.rows.map((row) =>
+        this.userMapper.toDomain(row as UserModel)
+      );
+
+      console.log('Users mapped:', users.length);
+
+      return Ok(users);
+    } catch (error) {
+      console.error('Error in FindUsersQueryHandler:', error);
+      return Err(error as Error);
+    }
   }
 }

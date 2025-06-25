@@ -16,12 +16,21 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
  */
 export const userSchema = z.object({
   id: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.union([z.string(), z.date(), z.number()]).transform(val => {
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number') return new Date(val).toISOString();
+    return val.toISOString();
+  }),
+  updatedAt: z.union([z.string(), z.date(), z.number()]).transform(val => {
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number') return new Date(val).toISOString();
+    return val.toISOString();
+  }),
   email: z.string(),
-  country: z.string().optional(),
-  postalCode: z.string().optional(),
-  street: z.string().optional(),
+  country: z.union([z.string(), z.null()]).optional(),
+  postalCode: z.union([z.string(), z.null()]).optional(),
+  street: z.union([z.string(), z.null()]).optional(),
+  role: z.union([z.string(), z.null()]).optional(),
 });
 
 export type UserModel = z.infer<typeof userSchema>;
