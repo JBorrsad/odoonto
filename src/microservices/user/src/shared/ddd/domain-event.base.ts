@@ -41,11 +41,20 @@ export abstract class DomainEvent {
         'DomainEvent props should not be empty',
       );
     }
+
+    // Obtener requestId de forma segura (puede no existir en mensajes de microservicios)
+    let requestId;
+    try {
+      requestId = RequestContextService.getRequestId();
+    } catch (error) {
+      // No hay contexto de request (ej: mensajes de RabbitMQ)
+      requestId = randomUUID();
+    }
+
     this.id = randomUUID();
     this.aggregateId = props.aggregateId;
     this.metadata = {
-      correlationId:
-        props?.metadata?.correlationId || RequestContextService.getRequestId(),
+      correlationId: props?.metadata?.correlationId || requestId,
       causationId: props?.metadata?.causationId,
       timestamp: props?.metadata?.timestamp || Date.now(),
       userId: props?.metadata?.userId,

@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-// import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { UserModule } from './user.module';
@@ -29,17 +29,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // Temporalmente deshabilitado hasta instalar RabbitMQ
-  // app.connectMicroservice<MicroserviceOptions>({
-  //   transport: Transport.RMQ,
-  //   options: {
-  //     urls: [process.env.RMQ_URL || 'amqp://admin:admin@localhost:5672'],
-  //     queue: 'user_queue',
-  //     queueOptions: { durable: true },
-  //   },
-  // });
+  // Configuración de RabbitMQ para microservicios
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: [process.env.USER_RMQ_URL || 'amqp://admin:admin@localhost:5672'],
+      queue: 'user_queue',
+      queueOptions: { durable: true },
+    },
+  });
 
-  // await app.startAllMicroservices();
+  await app.startAllMicroservices();
 
   const port = process.env.USER_SERVICE_PORT || 3001;
   await app.listen(port);

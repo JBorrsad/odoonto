@@ -1,6 +1,7 @@
 import { Logger, Module, Provider } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RequestContextModule } from 'nestjs-request-context';
+import { RabbitMQService } from './infrastructure/messaging/rabbitmq.service';
 import { UserRepository } from './database/user.repository';
 import { DatabaseModule } from './database/database.module';
 import { CreateUserHttpController } from './commands/create-user/create-user.http.controller';
@@ -50,6 +51,8 @@ const repositories: Provider[] = [
   { provide: USER_REPOSITORY, useClass: UserRepository },
 ];
 
+const messagingServices: Provider[] = [RabbitMQService];
+
 @Module({
   imports: [
     RequestContextModule,
@@ -62,6 +65,7 @@ const repositories: Provider[] = [
     Logger,
     // ...cliControllers,
     ...repositories,
+    ...messagingServices,
     // ...graphqlResolvers,
     ...commandHandlers,
     ...queryHandlers,

@@ -42,10 +42,19 @@ export class Command {
         'Command props should not be empty',
       );
     }
-    const ctx = RequestContextService.getContext();
+
+    // Obtener contexto de forma segura (puede no existir en mensajes de microservicios)
+    let ctx;
+    try {
+      ctx = RequestContextService.getContext();
+    } catch (error) {
+      // No hay contexto de request (ej: mensajes de RabbitMQ)
+      ctx = null;
+    }
+
     this.id = props.id || randomUUID();
     this.metadata = {
-      correlationId: props?.metadata?.correlationId || ctx.requestId,
+      correlationId: props?.metadata?.correlationId || ctx?.requestId || randomUUID(),
       causationId: props?.metadata?.causationId,
       timestamp: props?.metadata?.timestamp || Date.now(),
       userId: props?.metadata?.userId,

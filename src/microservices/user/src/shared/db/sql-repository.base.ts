@@ -79,8 +79,15 @@ export abstract class SqlRepositoryBase<
       this.tableName,
     ])} WHERE id = ${entity.id}`;
 
+    let requestId;
+    try {
+      requestId = RequestContextService.getRequestId();
+    } catch (error) {
+      requestId = 'microservice';
+    }
+
     this.logger.debug(
-      `[${RequestContextService.getRequestId()}] deleting entities ${entity.id
+      `[${requestId}] deleting entities ${entity.id
       } from ${this.tableName}`,
     );
 
@@ -106,8 +113,15 @@ export abstract class SqlRepositoryBase<
       await this.writeQuery(query, entities);
     } catch (error) {
       if (error instanceof UniqueIntegrityConstraintViolationError) {
+        let requestId;
+        try {
+          requestId = RequestContextService.getRequestId();
+        } catch (error) {
+          requestId = 'microservice';
+        }
+
         this.logger.debug(
-          `[${RequestContextService.getRequestId()}] ${(error.originalError as any).detail
+          `[${requestId}] ${(error.originalError as any).detail
           }`,
         );
         throw new ConflictException('Record already exists', error);
@@ -130,8 +144,15 @@ export abstract class SqlRepositoryBase<
     entities.forEach((entity) => entity.validate());
     const entityIds = entities.map((e) => e.id);
 
+    let requestId;
+    try {
+      requestId = RequestContextService.getRequestId();
+    } catch (error) {
+      requestId = 'microservice';
+    }
+
     this.logger.debug(
-      `[${RequestContextService.getRequestId()}] writing ${entities.length
+      `[${requestId}] writing ${entities.length
       } entities to "${this.tableName}" table: ${entityIds}`,
     );
 
@@ -188,26 +209,48 @@ export abstract class SqlRepositoryBase<
    */
   public async transaction<T>(handler: () => Promise<T>): Promise<T> {
     return this.pool.transaction(async (connection) => {
+      let requestId;
+      try {
+        requestId = RequestContextService.getRequestId();
+      } catch (error) {
+        requestId = 'microservice';
+      }
+
       this.logger.debug(
-        `[${RequestContextService.getRequestId()}] transaction started`,
+        `[${requestId}] transaction started`,
       );
-      if (!RequestContextService.getTransactionConnection()) {
-        RequestContextService.setTransactionConnection(connection);
+
+      // Solo configurar conexión de transacción si hay contexto disponible
+      let hasContext = false;
+      try {
+        if (!RequestContextService.getTransactionConnection()) {
+          RequestContextService.setTransactionConnection(connection);
+          hasContext = true;
+        }
+      } catch (error) {
+        // No hay contexto disponible (mensajes de microservicios)
+        hasContext = false;
       }
 
       try {
         const result = await handler();
         this.logger.debug(
-          `[${RequestContextService.getRequestId()}] transaction committed`,
+          `[${requestId}] transaction committed`,
         );
         return result;
       } catch (e) {
         this.logger.debug(
-          `[${RequestContextService.getRequestId()}] transaction aborted`,
+          `[${requestId}] transaction aborted`,
         );
         throw e;
       } finally {
-        RequestContextService.cleanTransactionConnection();
+        if (hasContext) {
+          try {
+            RequestContextService.cleanTransactionConnection();
+          } catch (error) {
+            // Ignorar errores al limpiar contexto
+          }
+        }
       }
     });
   }
@@ -218,8 +261,13 @@ export abstract class SqlRepositoryBase<
    * returns a transaction pool.
    */
   protected get pool(): DatabasePool | DatabaseTransactionConnection {
-    return (
-      RequestContextService.getContext().transactionConnection ?? this._pool
-    );
+    try {
+      return (
+        RequestContextService.getContext().transactionConnection ?? this._pool
+      );
+    } catch (error) {
+      // No hay contexto disponible (mensajes de microservicios)
+      return this._pool;
+    }
   }
 }

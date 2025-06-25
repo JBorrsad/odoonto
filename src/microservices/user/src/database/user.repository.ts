@@ -81,9 +81,9 @@ export class UserRepository
       UPDATE users 
       SET 
         country = ${userProps.address?.country || null},
-        postal_code = ${userProps.address?.postalCode || null},
+        "postalCode" = ${userProps.address?.postalCode || null},
         street = ${userProps.address?.street || null},
-        updated_at = NOW()
+        "updatedAt" = NOW()
       WHERE id = ${userProps.id}
     `);
   }

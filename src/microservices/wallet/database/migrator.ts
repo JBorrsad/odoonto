@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 export async function getWalletMigrator() {
     const pool = await createPool(
-        `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+        `postgres://${process.env.WALLET_DB_USERNAME}:${process.env.WALLET_DB_PASSWORD}@${process.env.WALLET_DB_HOST}:${process.env.WALLET_DB_PORT}/${process.env.WALLET_DB_NAME}`,
     );
 
     const migrator = new SlonikMigrator({

@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice(WalletModule, {
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.RMQ_URL],
+      urls: [process.env.WALLET_RMQ_URL],
       queue: 'wallet',
       queueOptions: { durable: true },
     },

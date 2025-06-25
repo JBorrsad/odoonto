@@ -23,10 +23,18 @@ export abstract class AggregateRoot<EntityProps> extends Entity<EntityProps> {
     logger: LoggerPort,
     eventEmitter: EventEmitter2,
   ): Promise<void> {
+    // Obtener requestId de forma segura
+    let requestId;
+    try {
+      requestId = RequestContextService.getRequestId();
+    } catch (error) {
+      requestId = 'microservice';
+    }
+    
     await Promise.all(
       this.domainEvents.map(async (event) => {
         logger.debug(
-          `[${RequestContextService.getRequestId()}] "${
+          `[${requestId}] "${
             event.constructor.name
           }" event published for aggregate ${this.constructor.name} : ${
             this.id

@@ -43,8 +43,15 @@ export abstract class ExceptionBase extends Error {
   ) {
     super(message);
     Error.captureStackTrace(this, this.constructor);
-    const ctx = RequestContextService.getContext();
-    this.correlationId = ctx.requestId;
+
+    // Obtener correlationId de forma segura
+    try {
+      const ctx = RequestContextService.getContext();
+      this.correlationId = ctx.requestId;
+    } catch (error) {
+      // No hay contexto disponible (mensajes de microservicios)
+      this.correlationId = 'microservice-' + Date.now();
+    }
   }
 
   /**
