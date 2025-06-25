@@ -12,11 +12,11 @@ import { join } from 'path';
         SlonikModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
-                const dbUsername = configService.get('DB_USERNAME') || 'postgres';
-                const dbPassword = configService.get('DB_PASSWORD') || 'postgres123';
-                const dbHost = configService.get('DB_HOST') || 'localhost';
-                const dbPort = configService.get('DB_PORT') || '5432';
-                const dbName = configService.get('DB_NAME') || 'odoonto';
+                const dbUsername = configService.get('DATABASE_USER') || 'postgres';
+                const dbPassword = configService.get('DATABASE_PASSWORD') || 'postgres123';
+                const dbHost = configService.get('DATABASE_HOST') || 'localhost';
+                const dbPort = configService.get('DATABASE_PORT') || '5432';
+                const dbName = configService.get('DATABASE_NAME') || 'odoonto';
 
                 const connectionUri = `postgres://${dbUsername}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
                 console.log('🔍 DEBUG - Environment variables:', {

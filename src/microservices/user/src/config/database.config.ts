@@ -5,11 +5,11 @@ import '../shared/utils/dotenv';
 
 export const databaseConfig = {
   type: 'postgres',
-  host: get('DB_HOST').required().asString(),
-  port: get('DB_PORT').required().asIntPositive(),
-  username: get('DB_USERNAME').required().asString(),
-  password: get('DB_PASSWORD').required().asString(),
-  database: get('DB_NAME').required().asString(),
+  host: get('DATABASE_HOST').default('localhost').asString(),
+  port: get('DATABASE_PORT').default(5432).asIntPositive(),
+  username: get('DATABASE_USER').default('postgres').asString(),
+  password: get('DATABASE_PASSWORD').default('postgres123').asString(),
+  database: get('DATABASE_NAME').default('odoonto').asString(),
 };
 
-export const postgresConnectionUri = `postgres://${databaseConfig.username}:${databaseConfig.password}@${databaseConfig.host}/${databaseConfig.database}`;
+export const postgresConnectionUri = `postgres://${databaseConfig.username}:${databaseConfig.password}@${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.database}`;

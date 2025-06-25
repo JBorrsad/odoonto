@@ -6,11 +6,11 @@ import { DatabaseModule } from './database/database.module';
 import { CreateUserHttpController } from './commands/create-user/create-user.http.controller';
 import { DeleteUserHttpController } from './commands/delete-user/delete-user.http-controller';
 import { UpdateUserHttpController } from './commands/update-user/update-user.http.controller';
-import { CreateUserCliController } from './commands/create-user/create-user.cli.controller';
+// import { CreateUserCliController } from './commands/create-user/create-user.cli.controller';
 import { FindUsersHttpController } from './queries/find-users/find-users.http.controller';
 import { FindUserByIdHttpController } from './queries/find-user-by-id/find-user-by-id.http.controller';
 import { CreateUserMessageController } from './commands/create-user/create-user.message.controller';
-import { CreateUserGraphqlResolver } from './commands/create-user/graphql-example/create-user.graphql-resolver';
+// import { CreateUserGraphqlResolver } from './commands/create-user/graphql-example/create-user.graphql-resolver';
 import { CreateUserService } from './commands/create-user/create-user.service';
 import { DeleteUserService } from './commands/delete-user/delete-user.service';
 import { UpdateUserService } from './commands/update-user/update-user.service';
@@ -19,7 +19,7 @@ import { FindUserByIdQueryHandler } from './queries/find-user-by-id/find-user-by
 import { UserMapper } from './user.mapper';
 import { CqrsModule } from '@nestjs/cqrs';
 import { USER_REPOSITORY } from './user.di-tokens';
-import { FindUsersGraphqlResolver } from './queries/find-users/find-users.graphql-resolver';
+// import { FindUsersGraphqlResolver } from './queries/find-users/find-users.graphql-resolver';
 import { HealthController } from './health/health.controller';
 
 const httpControllers = [
@@ -33,12 +33,12 @@ const httpControllers = [
 
 const messageControllers = [CreateUserMessageController];
 
-const cliControllers: Provider[] = [CreateUserCliController];
+// const cliControllers: Provider[] = [CreateUserCliController];
 
-const graphqlResolvers: Provider[] = [
-  CreateUserGraphqlResolver,
-  FindUsersGraphqlResolver,
-];
+// const graphqlResolvers: Provider[] = [
+//   CreateUserGraphqlResolver,
+//   FindUsersGraphqlResolver,
+// ];
 
 const commandHandlers: Provider[] = [CreateUserService, DeleteUserService, UpdateUserService];
 
@@ -60,9 +60,9 @@ const repositories: Provider[] = [
   controllers: [...httpControllers, ...messageControllers],
   providers: [
     Logger,
-    ...cliControllers,
+    // ...cliControllers,
     ...repositories,
-    ...graphqlResolvers,
+    // ...graphqlResolvers,
     ...commandHandlers,
     ...queryHandlers,
     ...mappers,
